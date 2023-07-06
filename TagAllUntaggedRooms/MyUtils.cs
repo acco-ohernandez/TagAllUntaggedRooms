@@ -74,7 +74,26 @@ namespace TagAllUntaggedRooms
 
             return rooms;
         }
+        public static ICollection<View> GetSelectedViews(Document doc)
+        {
+            UIDocument uidoc = new UIDocument(doc);
 
+            // Get the selected elements from the UIDocument
+            ICollection<ElementId> selectedElementIds = uidoc.Selection.GetElementIds();
+
+            // Filter out the views from the selected elements
+            ICollection<View> selectedViews = new List<View>();
+            foreach (ElementId elementId in selectedElementIds)
+            {
+                Element element = doc.GetElement(elementId);
+                if (element is View view)
+                {
+                    selectedViews.Add(view);
+                }
+            }
+
+            return selectedViews;
+        }
         public static void TagUntaggedRoomsOnLevel(Document doc, Level level)
         {
             // Get the Level Id
