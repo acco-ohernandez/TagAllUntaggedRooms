@@ -28,15 +28,14 @@ namespace TagAllUntaggedRooms
             Application app = uiapp.Application;
             Document doc = uidoc.Document;
 
-
             // Create a new method (MyUtils.GetSelectedViews(doc)) to get Only the selected Views
-            var allCeilingPlanViews = MyUtils.GetAllCeilingPlanViews(doc); // < Replace this method
+            var SelectedViews = MyUtils.GetAllCeilingPlanViews(doc); // < Replace this method
 
             int count = 0;
             using (Transaction t = new Transaction(doc, "Tagged All CeilingPlan Rooms"))
             {
                 t.Start();
-                foreach (var ceilingPlanView in allCeilingPlanViews)
+                foreach (var ceilingPlanView in SelectedViews)
                 {
                     count += MyUtils.TagUntaggedRoomsInView(doc, uidoc, ceilingPlanView);
                 }

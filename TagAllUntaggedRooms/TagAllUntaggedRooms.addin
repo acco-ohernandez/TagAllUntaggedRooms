@@ -1,11 +1,11 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <RevitAddIns>
   <AddIn Type="Command">
-    <Text>Tag Current View Rooms</Text>
+    <Text>Tag Selected Views Rooms</Text>
     <Description>Some description for TagAllUntaggedRooms</Description>
     <Assembly>TagAllUntaggedRooms.dll</Assembly>
-    <FullClassName>TagAllUntaggedRooms.Cmd_TagCurrentViewRooms</FullClassName>
-    <ClientId>02695f85-d8fc-4948-9936-004e930146fe</ClientId>
+    <FullClassName>TagAllUntaggedRooms.Cmd_TagOnlySelectedViews</FullClassName>
+    <ClientId>F2AA5593-5AE7-4491-8D89-6A4BC36BC50E</ClientId>
     <VendorId>com.typepad.thebuildingcoder</VendorId>
     <VendorDescription>The Building Coder, http://thebuildingcoder.typepad.com</VendorDescription>
   </AddIn>
@@ -24,6 +24,15 @@
     <Assembly>TagAllUntaggedRooms.dll</Assembly>
     <FullClassName>TagAllUntaggedRooms.Cmd_TagAllCeilingPlanRooms</FullClassName>
     <ClientId>913820EC-0D78-4E14-9B56-94A865D9EE1E</ClientId>
+    <VendorId>com.typepad.thebuildingcoder</VendorId>
+    <VendorDescription>The Building Coder, http://thebuildingcoder.typepad.com</VendorDescription>
+  </AddIn>
+  <AddIn Type="Command">
+    <Text>Tag Current View Rooms</Text>
+    <Description>Some description for TagAllUntaggedRooms</Description>
+    <Assembly>TagAllUntaggedRooms.dll</Assembly>
+    <FullClassName>TagAllUntaggedRooms.Cmd_TagCurrentViewRooms</FullClassName>
+    <ClientId>02695f85-d8fc-4948-9936-004e930146fe</ClientId>
     <VendorId>com.typepad.thebuildingcoder</VendorId>
     <VendorDescription>The Building Coder, http://thebuildingcoder.typepad.com</VendorDescription>
   </AddIn>
