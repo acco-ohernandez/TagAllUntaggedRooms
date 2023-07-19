@@ -151,7 +151,6 @@ namespace TagAllUntaggedRooms
 
             return viewSheets;
         }
-
         public static ICollection<View> GetAllFloorPlanViews(Document doc)
         {
             // Retrieve all views of ViewType.FloorPlan
@@ -163,7 +162,6 @@ namespace TagAllUntaggedRooms
 
             return floorPlanViews;
         }
-
         public static ICollection<View> GetAllCeilingPlanViews(Document doc)
         {
             // Retrieve all views of ViewType.FloorPlan
@@ -175,8 +173,6 @@ namespace TagAllUntaggedRooms
 
             return ceilingPlanViews;
         }
-
-
         public static ICollection<ViewSheet> GetAllFloorPlanViewSheets(Document doc)
         {
             // Retrieve all ViewSheet elements from the document
@@ -218,9 +214,7 @@ namespace TagAllUntaggedRooms
                 ICollection<ElementId> untaggedRoomIds = new List<ElementId>();
                 foreach (ElementId roomId in roomIds)
                 {
-                    Room room = doc.GetElement(roomId) as Room;
-
-                    if (room != null && room.GetParameters("Tag").FirstOrDefault() == null)
+                    if (!CheckIfTagged(doc, roomId))
                     {
                         untaggedRoomIds.Add(roomId);
                     }
@@ -282,7 +276,6 @@ namespace TagAllUntaggedRooms
                 TaskDialog.Show("Error", "Please switch to a floor plan or ceiling plan view.");
             }
         }
-
         public static int TagUntaggedRoomsInView(Document doc, UIDocument uidoc, View view)
         {
             if (doc == null || uidoc == null)
@@ -311,13 +304,21 @@ namespace TagAllUntaggedRooms
                 ICollection<ElementId> untaggedRoomIds = new List<ElementId>();
                 foreach (ElementId roomId in roomIds)
                 {
-                    Room room = doc.GetElement(roomId) as Room;
 
-                    if (room != null && room.GetParameters("Tag").FirstOrDefault() == null)
+                    if (!CheckIfTagged(doc, roomId))
                     {
                         untaggedRoomIds.Add(roomId);
                     }
                 }
+                //foreach (ElementId roomId in roomIds)
+                //{
+                //    Room room = doc.GetElement(roomId) as Room;
+
+                //    if (room != null && room.GetParameters("Tag").FirstOrDefault() == null)
+                //    {
+                //        untaggedRoomIds.Add(roomId);
+                //    }
+                //}
 
                 // Get the loaded tag family
                 FilteredElementCollector tagCollector = new FilteredElementCollector(doc)
@@ -366,284 +367,29 @@ namespace TagAllUntaggedRooms
 
             return processedViewsCount;
         }
-
         private static bool IsValidFloorPlanView(View view)
         {
             return view.ViewType == ViewType.FloorPlan || view.ViewType == ViewType.CeilingPlan;
         }
-
-        public static int TagUntaggedRoomsInView5(Document doc, UIDocument uidoc, View view)
+        public static bool CheckIfTagged(Document curDoc, ElementId curElemId)
         {
-            int processedViewsCount = 0;
+            Element room = curDoc.GetElement(curElemId);
 
-            // Check if the provided view is valid for element iteration
-            if (view.CanBePrinted)
+            // Retrieve the dependent elements of the room, including tags
+            IList<ElementId> dependentElementIds = room.GetDependentElements(null);
+
+            // Check if any of the dependent elements are tags
+            foreach (ElementId dependentElemId in dependentElementIds)
             {
-                // Retrieve all the rooms within the view
-                ICollection<ElementId> roomIds = new FilteredElementCollector(doc, view.Id)
-                    .OfCategory(BuiltInCategory.OST_Rooms)
-                    .WhereElementIsNotElementType()
-                    .ToElementIds();
-
-                // Filter out the already tagged rooms
-                ICollection<ElementId> untaggedRoomIds = new List<ElementId>();
-                foreach (ElementId roomId in roomIds)
+                Element dependentElem = curDoc.GetElement(dependentElemId);
+                if (dependentElem is IndependentTag)
                 {
-                    Room room = doc.GetElement(roomId) as Room;
-
-                    if (room != null && room.GetParameters("Tag").FirstOrDefault() == null)
-                    {
-                        untaggedRoomIds.Add(roomId);
-                    }
-                }
-
-                // Get the loaded tag family
-                FilteredElementCollector tagCollector = new FilteredElementCollector(doc)
-                    .OfClass(typeof(FamilySymbol))
-                    .OfCategory(BuiltInCategory.OST_RoomTags)
-                    .WhereElementIsElementType();
-
-                FamilySymbol tagSymbol = tagCollector.Cast<FamilySymbol>().FirstOrDefault();
-
-                // Create a new tag for each untagged room
-                List<ElementId> tagIds = new List<ElementId>();
-                foreach (ElementId roomId in untaggedRoomIds)
-                {
-                    Room room = doc.GetElement(roomId) as Room;
-                    if (room != null)
-                    {
-                        // Create a reference for the room
-                        Reference roomReference = new Reference(room);
-
-                        // Get the room location point
-                        XYZ roomLocation = (room.Location as LocationPoint)?.Point;
-
-                        // Create a new tag at the room location
-                        IndependentTag newTag = IndependentTag.Create(
-                            doc,
-                            tagSymbol.Id,
-                            view.Id,
-                            roomReference,
-                            false,
-                            TagOrientation.Horizontal,
-                            roomLocation);
-
-                        // Assign the tag family symbol to the newly created tag
-                        newTag.ChangeTypeId(tagSymbol.Id);
-                        tagIds.Add(newTag.Id);
-                        // Increment the count of tagged rooms
-                        processedViewsCount++;
-                    }
-                }
-            }
-            return processedViewsCount;
-        }
-
-        public static int TagUntaggedRoomsInView4(Document doc, UIDocument uidoc, View view)
-        {
-            int processedViewsCount = 0;
-
-            // Check if the provided view is valid for element iteration
-            if (view.CanBePrinted)
-            {
-                // Retrieve all the rooms within the view
-                ICollection<ElementId> roomIds = new FilteredElementCollector(doc, view.Id)
-                    .OfCategory(BuiltInCategory.OST_Rooms)
-                    .WhereElementIsNotElementType()
-                    .ToElementIds();
-
-                // Filter out the already tagged rooms
-                ICollection<ElementId> untaggedRoomIds = new List<ElementId>();
-                foreach (ElementId roomId in roomIds)
-                {
-                    Room room = doc.GetElement(roomId) as Room;
-
-                    if (room != null && room.GetParameters("Tag").FirstOrDefault() == null)
-                    {
-                        untaggedRoomIds.Add(roomId);
-                    }
-                }
-
-                // Get the loaded tag family
-                FilteredElementCollector tagCollector = new FilteredElementCollector(doc)
-                    .OfClass(typeof(FamilySymbol))
-                    .OfCategory(BuiltInCategory.OST_RoomTags)
-                    .WhereElementIsElementType();
-
-                FamilySymbol tagSymbol = tagCollector.Cast<FamilySymbol>().FirstOrDefault();
-
-                // Create a new tag for each untagged room
-                List<ElementId> tagIds = new List<ElementId>();
-                foreach (ElementId roomId in untaggedRoomIds)
-                {
-                    Room room = doc.GetElement(roomId) as Room;
-                    if (room != null)
-                    {
-                        // Create a reference for the room
-                        Reference roomReference = new Reference(room);
-
-                        // Get the room location point
-                        XYZ roomLocation = (room.Location as LocationPoint)?.Point;
-
-                        // Create a new tag at the room location
-                        IndependentTag newTag = IndependentTag.Create(
-                            doc,
-                            tagSymbol.Id,
-                            view.Id,
-                            roomReference,
-                            false,
-                            TagOrientation.Horizontal,
-                            roomLocation);
-
-                        // Assign the tag family symbol to the newly created tag
-                        newTag.ChangeTypeId(tagSymbol.Id);
-                        tagIds.Add(newTag.Id);
-                        //increment the count of tagged rooms
-                        processedViewsCount++;
-                    }
-                }
-            }
-            return processedViewsCount;
-        }
-
-        public static int TagUntaggedRoomsInView3(Document doc, UIDocument uidoc, View view)
-        {
-            int processedRoomsCount = 0;
-
-            // Check if the provided view is a floor plan or ceiling plan
-            if (view.ViewType == ViewType.FloorPlan || view.ViewType == ViewType.CeilingPlan)
-            {
-                // Retrieve all the rooms within the view
-                ICollection<ElementId> roomIds = new FilteredElementCollector(doc, view.Id)
-                    .OfCategory(BuiltInCategory.OST_Rooms)
-                    .WhereElementIsNotElementType()
-                    .ToElementIds();
-
-                // Get the loaded tag family
-                FilteredElementCollector tagCollector = new FilteredElementCollector(doc)
-                    .OfClass(typeof(FamilySymbol))
-                    .OfCategory(BuiltInCategory.OST_RoomTags)
-                    .WhereElementIsElementType();
-
-                FamilySymbol tagSymbol = tagCollector.Cast<FamilySymbol>().FirstOrDefault();
-
-                // Filter out the already tagged rooms
-                ICollection<ElementId> untaggedRoomIds = roomIds
-                    .Select(roomId => doc.GetElement(roomId) as Room)
-                    .Where(room => room != null && room.GetParameters("Tag").FirstOrDefault() == null)
-                    .Select(room => room.Id)
-                    .ToList();
-
-                // Create a new tag for each untagged room
-                List<ElementId> tagIds = new List<ElementId>();
-                foreach (ElementId roomId in untaggedRoomIds)
-                {
-                    Room room = doc.GetElement(roomId) as Room;
-                    if (room != null)
-                    {
-                        // Create a reference for the room
-                        Reference roomReference = new Reference(room);
-
-                        // Get the room location point
-                        XYZ roomLocation = (room.Location as LocationPoint)?.Point;
-
-                        // Create a new tag at the room location
-                        IndependentTag newTag = IndependentTag.Create(
-                            doc,
-                            tagSymbol.Id,
-                            view.Id,
-                            roomReference,
-                            false,
-                            TagOrientation.Horizontal,
-                            roomLocation);
-
-                        // Assign the tag family symbol to the newly created tag
-                        newTag.ChangeTypeId(tagSymbol.Id);
-                        tagIds.Add(newTag.Id);
-
-                        // Increment the count of tagged rooms
-                        processedRoomsCount++;
-                    }
-                }
-
-                // Set the selection to the newly created tags
-                if (tagIds.Count > 0)
-                {
-                    uidoc.Selection.SetElementIds(tagIds);
+                    return true;
                 }
             }
 
-            return processedRoomsCount;
+            return false;
         }
-
-        public static int TagUntaggedRoomsInView2(Document doc, UIDocument uidoc, View view)
-        {
-            int processedViewsCount = 0;
-
-            // Check if the provided view is a floor plan or ceiling plan
-            if (view.ViewType == ViewType.FloorPlan || view.ViewType == ViewType.CeilingPlan)
-            {
-                // Retrieve all the rooms within the view
-                ICollection<ElementId> roomIds = new FilteredElementCollector(doc, view.Id)
-                    .OfCategory(BuiltInCategory.OST_Rooms)
-                    .WhereElementIsNotElementType()
-                    .ToElementIds();
-
-                // Filter out the already tagged rooms
-                ICollection<ElementId> untaggedRoomIds = new List<ElementId>();
-                foreach (ElementId roomId in roomIds)
-                {
-                    Room room = doc.GetElement(roomId) as Room;
-
-                    if (room != null && room.GetParameters("Tag").FirstOrDefault() == null)
-                    {
-                        untaggedRoomIds.Add(roomId);
-                    }
-                }
-
-                // Get the loaded tag family
-                FilteredElementCollector tagCollector = new FilteredElementCollector(doc)
-                    .OfClass(typeof(FamilySymbol))
-                    .OfCategory(BuiltInCategory.OST_RoomTags)
-                    .WhereElementIsElementType();
-
-                FamilySymbol tagSymbol = tagCollector.Cast<FamilySymbol>().FirstOrDefault();
-
-                // Create a new tag for each untagged room
-                List<ElementId> tagIds = new List<ElementId>();
-                foreach (ElementId roomId in untaggedRoomIds)
-                {
-                    Room room = doc.GetElement(roomId) as Room;
-                    if (room != null)
-                    {
-                        // Create a reference for the room
-                        Reference roomReference = new Reference(room);
-
-                        // Get the room location point
-                        XYZ roomLocation = (room.Location as LocationPoint)?.Point;
-
-                        // Create a new tag at the room location
-                        IndependentTag newTag = IndependentTag.Create(
-                            doc,
-                            tagSymbol.Id,
-                            view.Id,
-                            roomReference,
-                            false,
-                            TagOrientation.Horizontal,
-                            roomLocation);
-
-                        // Assign the tag family symbol to the newly created tag
-                        newTag.ChangeTypeId(tagSymbol.Id);
-                        tagIds.Add(newTag.Id);
-                        //increment the count of tagged rooms
-                        processedViewsCount++;
-
-                    }
-                }
-            }
-            return processedViewsCount;
-        }
-
 
     }// End of MyUtils
 }

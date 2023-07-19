@@ -35,9 +35,9 @@ namespace TagAllUntaggedRooms
             using (Transaction t = new Transaction(doc, "Tagged All CeilingPlan Rooms"))
             {
                 t.Start();
-                foreach (var ceilingPlanView in SelectedViews)
+                foreach (var curSelectedView in SelectedViews)
                 {
-                    count += MyUtils.TagUntaggedRoomsInView(doc, uidoc, ceilingPlanView);
+                    count += MyUtils.TagUntaggedRoomsInView(doc, uidoc, curSelectedView);
                 }
                 t.Commit();
             }
